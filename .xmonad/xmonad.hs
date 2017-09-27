@@ -209,7 +209,7 @@ myBorderWidth = 1
 --
 myModMask = mod4Mask
 
-floatCtrlMode =
+floatCtlMode =
     [
     -- move fast
       ((0, xK_h), withFocused (keysMoveWindow (-15,0) ) )
@@ -278,7 +278,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- floating: move and resize with h, j, k, l. These are modes. Just hit modm+g and then
     -- use plain h,j,k,l. Hit Esc when done
-    , ((modm,                 xK_g), inputMode floatCtrlMode)
+    , ((modm,                 xK_g), inputMode floatCtlMode)
 
     -- workspaces
     , ((modm,                 xK_Escape ), toggleWS)
@@ -331,10 +331,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
-    -- ++
-    -- [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        -- | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-        -- , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    ++
+    [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
+        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+        , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 
 ------------------------------------------------------------------------
