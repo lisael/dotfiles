@@ -9,3 +9,5 @@ bin/trees.py
 bin/xmonadctl
 .config/awesome/rc.lua.old
 .config/awesome/rc.lua.old2
+.config/thefuck/__pycache__
+.config/thefuck/rules/__pycache__
