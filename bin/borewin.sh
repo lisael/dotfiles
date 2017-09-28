@@ -13,6 +13,6 @@ if [ -z $selected ]; then
 fi
 
 xdotool windowactivate $selected
-xdotool key super+b
+xdotool key super+v
 sleep 0.1
 xdotool windowactivate $orig
