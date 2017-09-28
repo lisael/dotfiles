@@ -239,7 +239,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,                 xK_b     ), sendMessage ToggleStruts) -- hide status bar
     , ((modm .|. shiftMask,   xK_q     ), io (exitWith ExitSuccess))
     , ((modm,                 xK_q     ), restart "xmonad" True)
-    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0")
+    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi /home/lisael/bin/clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0")
     -- , ((modm,                 xK_n), refresh)
 
     -- requires this in .xinitrc
