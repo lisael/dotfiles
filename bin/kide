@@ -1,0 +1,29 @@
+#! /bin/sh
+
+cmd="kak"
+is_kak_exe=false
+has_kak_exe=false
+
+for i in $(seq $#); do
+    if $is_kak_exe; then
+        arg="kide-init;$1"
+    else
+        arg="$1"
+    fi
+    cmd=$(python -c "from shlex import quote; print(\"\"\"$cmd \"\"\" + quote('$arg'),)")
+    if [ "$1" = "-e" ]; then
+        is_kak_exe=true
+        has_kak_exe=true
+    else
+        is_kak_exe=false
+    fi
+    shift
+done
+
+if $has_kak_exe; then
+    args=""
+else
+    args="-e \"kide-init\""
+fi
+
+eval "$cmd $args"
