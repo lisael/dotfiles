@@ -9,6 +9,7 @@ import System.Exit
 import XMonad
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS
+import XMonad.Actions.DwmPromote
 import XMonad.Actions.DynamicProjects
 import XMonad.Actions.DynamicWorkspaces
 import XMonad.Actions.FloatKeys
@@ -46,36 +47,21 @@ import qualified Data.Map        as M
 
 
 -- local stuff (~/.xmonad/lib/)
-
 import XMonad.Layout.IDE(IDE(..))
 import XMonad.Actions.InputMode
 
 
-------------------------------------------------------------------------
--- Terminal
--- The preferred terminal program, which is used in a binding below and by
--- certain contrib modules.
---
 myTerminal = "urxvt"
 
--- The command to lock the screen or show the screensaver.
-myScreensaver = "slock"
+myLocker = "slock"
 
--- The command to take a selective screenshot, where you select
--- what you'd like to capture on the screen.
-mySelectScreenshot = "select-screenshot"
+myScreenshot = "xfce4-screenshot -r"
 
--- The command to take a fullscreen screenshot.
-myScreenshot = "screenshot"
-
--- The command to use as a launcher, to launch commands that don't have
--- preset keybindings.
 myLauncher = "$(xboomx)"
 
 myEditor="urxvt -e zsh -c kak"
 
 myIDEEditor="urxvt -e zsh -c 'kak -e \"ide-init\"'"
-
 
 myProjects :: [Project]
 myProjects =
@@ -133,8 +119,10 @@ myManageHook = composeAll
     , className =? "Galculator"     --> doFloat
     , className =? "Steam"          --> doFloat
     , className =? "Gimp"           --> doFloat
+    , className =? "Dialog"         --> doFloat
     , resource  =? "gpicview"       --> doFloat
     , className =? "MPlayer"        --> doFloat
+    , className =? "Pinentry-gtk-2" --> doFloat
     , className =? "VirtualBox"     --> doShift "4:vm"
     , className =? "Xchat"          --> doShift "5:media"
     , className =? "stalonetray"    --> doIgnore
@@ -154,7 +142,7 @@ myManageHook = composeAll
 
 -- TODO: rewrite these in a more haskell-ish way
 
--- minMaxNamed :: ( LayoutClass l Window , LayoutClass l' Window ) => String -> l Window -> l' Window
+-- minMaxNamed :: ( LayoutClass l a , LayoutClass l' a ) => String -> l a -> l' a
 minMaxNamed :: ( LayoutClass l Window ) => String -> l Window -> ModifiedLayout Rename ( ModifiedLayout Minimize ( ModifiedLayout Maximize l ) ) Window
 minMaxNamed name layout =
     named name $ minimize (maximizeWithPadding 0 layout)
@@ -209,6 +197,7 @@ myBorderWidth = 1
 --
 myModMask = mod4Mask
 
+-- float InputMode
 floatCtlMode =
     [
     -- move fast
@@ -243,27 +232,21 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- mic...
     [ ((modm,                 xK_Return), spawn $ XMonad.terminal conf)
     , ((modm .|. shiftMask,   xK_Return), windows W.swapMaster) -- %! Swap the focused window and the master window
-    , ((modm,                 xK_x     ), spawn myScreensaver)
+    , ((modm,                 xK_x     ), spawn myLocker)
+    , ((modm .|. shiftMask,   xK_p     ), spawn "/home/lisael/bin/pass_finder.sh")
     , ((modm,                 xK_p     ), spawn myLauncher)
+    , ((modm .|. controlMask, xK_p     ), spawn myScreenshot)
     , ((modm,                 xK_b     ), sendMessage ToggleStruts) -- hide status bar
-    , ((modm .|. shiftMask,   xK_q), io (exitWith ExitSuccess))
-    , ((modm,                 xK_q), restart "xmonad" True)
-    , ((modm,                 xK_c), spawn "CM_LAUNCHER=rofi clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0")
-    , ((modm,                 xK_x), withFocused (sendMessage . maximizeRestore))
+    , ((modm .|. shiftMask,   xK_q     ), io (exitWith ExitSuccess))
+    , ((modm,                 xK_q     ), restart "xmonad" True)
+    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0")
+    -- , ((modm,                 xK_n), refresh)
 
     -- requires this in .xinitrc
     -- xmodmap -e "remove Lock = Caps_Lock"
     -- xmodmap -e "keycode  66 = XF86Mail NoSymbol XF86Mail"
     , ((0,                 xF86XK_Mail), spawn "/home/lisael/bin/easymove.sh")
 
-    -- screeshot
-    , ((modm .|. shiftMask,   xK_p     ), spawn mySelectScreenshot)
-    , ((modm .|. controlMask .|. shiftMask, xK_p), spawn myScreenshot)
-
-    -- media control
-    , ((0, xF86XK_AudioMute           ), spawn "amixer -q set Master toggle")
-    , ((0, xF86XK_AudioLowerVolume    ), spawn "amixer -q set Master 5%-")
-    , ((0, xF86XK_AudioRaiseVolume    ), spawn "amixer -q set Master 5%+")
 
     -- client control
     , ((modm .|. shiftMask,   xK_c    ), kill)
@@ -273,54 +256,61 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. controlMask, xK_j    ), windowSwap D False)
     , ((modm,                 xK_n    ), withFocused minimizeWindow)
     , ((modm .|. shiftMask,   xK_n    ), sendMessage RestoreNextMinimizedWin)
-    , ((modm,                 xK_v    ), windows copyToAll) -- @@ Make focused window always visible
-    , ((modm .|. shiftMask,   xK_v    ), killAllOtherCopies) -- @@ Toggle window state back
+    -- Sticky windows
+    , ((modm,                 xK_s    ), windows copyToAll) -- @@ Make focused window always visible
+    , ((modm .|. shiftMask,   xK_s    ), killAllOtherCopies) -- @@ Toggle window state back
+    , ((modm,                 xK_f    ), withFocused (sendMessage . maximizeRestore))
 
     -- floating: move and resize with h, j, k, l. These are modes. Just hit modm+g and then
     -- use plain h,j,k,l. Hit Esc when done
-    , ((modm,                 xK_g), inputMode floatCtlMode)
+    , ((modm,                 xK_g    ), inputMode floatCtlMode)
 
     -- workspaces
-    , ((modm,                 xK_Escape ), toggleWS)
-    , ((modm,                 xK_Right  ), nextWS)
-    , ((modm,                 xK_Left   ), prevWS)
-    , ((modm,                 xK_b      ), do markBoring
-                                              focusDown)
-    , ((modm .|. shiftMask,   xK_b      ), clearBoring)
-    , ((modm .|. controlMask, xK_b      ), spawn "/home/lisael/bin/borewin.sh")
-    , ((modm .|. shiftMask, xK_BackSpace), removeWorkspace)
-    , ((modm .|. shiftMask, xK_r      ), renameWorkspace def)
+    , ((modm,                 xK_Escape    ), toggleWS)
+    , ((modm,                 xK_Right     ), nextWS)
+    , ((modm,                 xK_Left      ), prevWS)
+    , ((modm,                 xK_v         ), do markBoring
+                                                 focusDown)
+    , ((modm .|. shiftMask,   xK_v        ), clearBoring)
+    , ((modm .|. controlMask, xK_v        ), spawn "/home/lisael/bin/borewin.sh")
+    , ((modm .|. shiftMask,   xK_BackSpace), removeWorkspace)
+    , ((modm .|. shiftMask,   xK_r        ), renameWorkspace def)
 
     -- projects
     , ((modm, xK_semicolon), switchProjectPrompt defaultXPConfig )
 
     -- layout
-    , ((modm,                 xK_space), sendMessage NextLayout)
-    , ((modm .|. shiftMask,   xK_space), setLayout $ XMonad.layoutHook conf)
-    , ((modm .|. shiftMask,   xK_l    ), windowGo R False)
-    , ((modm .|. shiftMask,   xK_h    ), windowGo L False)
-    , ((modm .|. shiftMask,   xK_k    ), windowGo U False)
-    , ((modm .|. shiftMask,   xK_j    ), windowGo D False)
-    , ((modm,                 xK_Tab), focusDown)
+    , ((modm,                 xK_space ), sendMessage NextLayout)
+    , ((modm .|. shiftMask,   xK_space ), setLayout $ XMonad.layoutHook conf)
+    , ((modm .|. shiftMask,   xK_l     ), windowGo R False)
+    , ((modm .|. shiftMask,   xK_h     ), windowGo L False)
+    , ((modm .|. shiftMask,   xK_k     ), windowGo U False)
+    , ((modm .|. shiftMask,   xK_j     ), windowGo D False)
+    , ((modm,                 xK_Tab   ), focusDown)
+    , ((modm,                 xK_grave ), dwmpromote)
 
-    -- , ((modm,                 xK_n), refresh)
-    , ((modm,                 xK_j), windows W.focusDown)
-    , ((modm,                 xK_k), windows W.focusUp  )
-    , ((modm,                 xK_m), windows W.focusMaster  )
-    , ((modm,                 xK_h), sendMessage Shrink)
-    , ((modm,                 xK_l), sendMessage Expand)
-    , ((modm,                 xK_t), withFocused $ windows . W.sink)
-    , ((modm,                 xK_comma), sendMessage (IncMasterN 1))
+    , ((modm,                 xK_j     ), windows W.focusDown)
+    , ((modm,                 xK_k     ), windows W.focusUp  )
+    , ((modm,                 xK_m     ), windows W.focusMaster  )
+    , ((modm,                 xK_h     ), sendMessage Shrink)
+    , ((modm,                 xK_l     ), sendMessage Expand)
+    , ((modm,                 xK_t     ), withFocused $ windows . W.sink)
+    , ((modm,                 xK_comma ), sendMessage (IncMasterN 1))
     , ((modm,                 xK_period), sendMessage (IncMasterN (-1)))
-    , ((modm,                 xK_6), withNthWorkspace W.greedyView 5)
+
+    -- media control
+    , ((0, xF86XK_AudioMute           ), spawn "amixer -q set Master toggle")
+    , ((0, xF86XK_AudioLowerVolume    ), spawn "amixer -q set Master 5%-")
+    , ((0, xF86XK_AudioRaiseVolume    ), spawn "amixer -q set Master 5%+")
+
     ]
 
     -- mod-[1..9]       %! Switch to workspace N in the list of workspaces
     -- mod-shift-[1..9] %! Move client to workspace N in the list of workspaces
     ++
-    zip (zip (repeat (modm)) [xK_1..xK_9]) (map (withNthWorkspace W.greedyView) [0..])
+    zip (zip (repeat (modm)) ([xK_1..xK_9] ++ [xK_0])) (map (withNthWorkspace W.greedyView) [0..])
     ++
-    zip (zip (repeat (modm .|. shiftMask)) [xK_1..xK_9]) (map (withNthWorkspace W.shift) [0..])
+    zip (zip (repeat (modm .|. shiftMask)) ( [xK_1..xK_9] ++ [xK_0] )) (map (withNthWorkspace W.shift) [0..])
 
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
