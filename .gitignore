@@ -7,3 +7,5 @@ bin/pony-project
 bin/tree_tools.py
 bin/trees.py
 bin/xmonadctl
+.config/awesome/rc.lua.old
+.config/awesome/rc.lua.old2
