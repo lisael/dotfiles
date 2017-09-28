@@ -1,9 +1,12 @@
 #! /bin/bash
-DOTFILES=~/projects/dotfiles/
+set -eux
+DOTFILES=~/projects/dotfiles
 
 file=$(realpath --relative-to $HOME $1)
-
-echo "mv $HOME/$file $DOTFILES"
-echo "ln -s $DOTFILES/$file $HOME/$file"
-echo "cd $DOTFILES"
-echo "git add $file"
+dir="$(dirname $file)"
+dest="$DOTFILES/$dir"
+mkdir -p "$dest"
+mv "$HOME/$file" "$dest"
+ln -s "$DOTFILES/$file" "$HOME/$file"
+#cd $DOTFILES
+# git add $file
