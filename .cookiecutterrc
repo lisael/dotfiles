@@ -1,0 +1,5 @@
+default_context:
+    full_name: "Bruno Dupuis"
+    email: "lisael@lisael.org"
+    github_username: "lisael"
+cookiecutters_dir: "~/.cookiecutters/"
