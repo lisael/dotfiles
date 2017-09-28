@@ -1,6 +1,6 @@
 #! /bin/bash
 
-PASS_DIR=~/.password-store/
+PASS_DIR=~/.password-store
 CLIPMENU_DIR=/tmp/clipmenu.3.${USER}
 CM_LOCKFILE=${CLIPMENU_DIR}/lock
 lock_timeout=2
@@ -9,7 +9,9 @@ CM_LINES=${CLIPMENU_DIR}/line_cache
 CM_LINES_TMP=${CLIPMENU_DIR}/line_cache.tmp
 
 PASS_PATH=$(
-    find ${PASS_DIR} -type f -and -not -name '.*' \
+    find ${PASS_DIR} -type f -and -not -name '.*' -printf "%T@ %p\n" \
+    | sort -n \
+    | awk '{print $2}' \
     | xargs -I {} realpath --relative-to ${PASS_DIR} {} \
     | sed 's/.gpg$//' \
     | rofi -dmenu -sync -i -font "mono 6" -p "Pass :" -scroll-method 1 -lines 30 -matching glob -hide-scrollbar -line-margin 0
@@ -17,6 +19,8 @@ PASS_PATH=$(
 
 [[ $PASS_PATH ]] || exit 1
 
+# update mtime to make most recent used passwd displayed first
+touch $PATH_DIR/$PASS_PATH.gpg
 
 exec {lock_fd}> "$CM_LOCKFILE"
 
