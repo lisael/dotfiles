@@ -1,0 +1,9 @@
+[user]
+	email = lisael@lisael.org
+	name = lisael
+[diff]
+	tool = vimdiff
+[merge]
+	tool = vimdiff
+[push]
+	default = current
