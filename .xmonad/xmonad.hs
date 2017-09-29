@@ -16,6 +16,7 @@ import XMonad.Actions.FloatKeys
 import XMonad.Actions.Navigation2D
 import XMonad.Actions.Navigation2D
 import XMonad.Actions.Submap
+import XMonad.Actions.TagWindows
 import XMonad.Actions.UpdatePointer
 import XMonad.Config.Desktop
 import XMonad.Hooks.DynamicLog
@@ -224,22 +225,29 @@ floatCtlMode =
     , ((0,         xK_Tab), focusDown )
     ]
 
+-- taggingMode :: XPConfig  -> [((KeyMask, KeySym), ( X () ))]
+taggingMode =
+    [
+      ((0,           xK_t  ), tagPrompt def (\s -> withFocused (addTag s)))
+    , ((controlMask, xK_t  ), tagDelPrompt def)
+    , ((0,           xK_Tab), focusDown )
+    ]
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
   ----------------------------------------------------------------------
   -- Custom key bindings
   --
     -- mic...
-    [ ((modm,                 xK_Return), spawn $ XMonad.terminal conf)
+    [ ((modm,                 xK_Return), spawn $ XMonad.terminal conf) -- %! New terminal
     , ((modm .|. shiftMask,   xK_Return), windows W.swapMaster) -- %! Swap the focused window and the master window
-    , ((modm,                 xK_x     ), spawn myLocker)
-    , ((modm .|. shiftMask,   xK_p     ), spawn "/home/lisael/bin/pass_finder.sh")
-    , ((modm,                 xK_p     ), spawn myLauncher)
-    , ((modm .|. controlMask, xK_p     ), spawn myScreenshot)
-    , ((modm,                 xK_b     ), sendMessage ToggleStruts) -- hide status bar
-    , ((modm .|. shiftMask,   xK_q     ), io (exitWith ExitSuccess))
-    , ((modm,                 xK_q     ), restart "xmonad" True)
-    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi /home/lisael/bin/clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0")
+    , ((modm,                 xK_x     ), spawn myLocker) -- %! Lock screen
+    , ((modm,                 xK_p     ), spawn myLauncher) -- %! App launcher
+    , ((modm .|. shiftMask,   xK_p     ), spawn "/home/lisael/bin/pass_finder.sh") -- %! Password finder
+    , ((modm .|. controlMask, xK_p     ), spawn myScreenshot) -- %! Screenshot
+    , ((modm,                 xK_b     ), sendMessage ToggleStruts) -- %! Hide status bar
+    , ((modm .|. shiftMask,   xK_q     ), io (exitWith ExitSuccess)) -- %! Quit XMonad
+    , ((modm,                 xK_q     ), restart "xmonad" True) -- %! Recompile and restart XMonad
+    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi /home/lisael/bin/clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0") -- %! Open clipboard manager
     -- , ((modm,                 xK_n), refresh)
 
     -- requires this in .xinitrc
@@ -249,54 +257,57 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
 
     -- client control
-    , ((modm .|. shiftMask,   xK_c    ), kill)
-    , ((modm .|. controlMask, xK_l    ), windowSwap R False)
-    , ((modm .|. controlMask, xK_h    ), windowSwap L False)
-    , ((modm .|. controlMask, xK_k    ), windowSwap U False)
-    , ((modm .|. controlMask, xK_j    ), windowSwap D False)
-    , ((modm,                 xK_n    ), withFocused minimizeWindow)
-    , ((modm .|. shiftMask,   xK_n    ), sendMessage RestoreNextMinimizedWin)
+    , ((modm .|. shiftMask,   xK_c    ), kill) -- %! Kill Client
+    , ((modm .|. controlMask, xK_l    ), windowSwap R False) -- %! Swap window to the right
+    , ((modm .|. controlMask, xK_h    ), windowSwap L False) -- %! Swap window to the left
+    , ((modm .|. controlMask, xK_k    ), windowSwap U False) -- %! Swap window upwards
+    , ((modm .|. controlMask, xK_j    ), windowSwap D False) -- %! Swap window downwards
+    , ((modm,                 xK_n    ), withFocused minimizeWindow) -- %! Minimize window
+    , ((modm .|. shiftMask,   xK_n    ), sendMessage RestoreNextMinimizedWin) -- %! Restore minimixed window
     -- Sticky windows
-    , ((modm,                 xK_s    ), windows copyToAll) -- @@ Make focused window always visible
-    , ((modm .|. shiftMask,   xK_s    ), killAllOtherCopies) -- @@ Toggle window state back
-    , ((modm,                 xK_f    ), withFocused (sendMessage . maximizeRestore))
+    , ((modm,                 xK_s    ), windows copyToAll) -- %! Sticky window
+    , ((modm .|. shiftMask,   xK_s    ), killAllOtherCopies) -- %! Not sticky
+    , ((modm,                 xF86XK_Mail), withFocused (sendMessage . maximizeRestore)) -- %! Toggle Fullscreen window
+
+    , ((modm,                 xK_y    ), inputMode taggingMode) -- %! Toggle tagging mode
+    -- , ((modm,                 xK_y  ), tagPrompt def (\s -> withFocused (addTag s)))
+    -- , ((modm .|. controlMask, xK_y  ), tagDelPrompt def)
 
     -- floating: move and resize with h, j, k, l. These are modes. Just hit modm+g and then
     -- use plain h,j,k,l. Hit Esc when done
-    , ((modm,                 xK_g    ), inputMode floatCtlMode)
+    , ((modm,                 xK_g    ), inputMode floatCtlMode) -- %! Toggle floatCtl
 
     -- workspaces
-    , ((modm,                 xK_Escape    ), toggleWS)
-    , ((modm,                 xK_Right     ), nextWS)
-    , ((modm,                 xK_Left      ), prevWS)
-    , ((modm,                 xK_v         ), do markBoring
+    , ((modm,                 xK_Escape    ), toggleWS) -- %! Toggle last workspace
+    , ((modm,                 xK_Right     ), nextWS) -- %! Next Workspace
+    , ((modm,                 xK_Left      ), prevWS) -- %! Previous Workspace
+    , ((modm,                 xK_v         ), do markBoring -- %! Mark window as boring
                                                  focusDown)
-    , ((modm .|. shiftMask,   xK_v        ), clearBoring)
-    , ((modm .|. controlMask, xK_v        ), spawn "/home/lisael/bin/borewin.sh")
-    , ((modm .|. shiftMask,   xK_BackSpace), removeWorkspace)
-    , ((modm .|. shiftMask,   xK_r        ), renameWorkspace def)
+    , ((modm .|. shiftMask,   xK_v        ), clearBoring) -- %! Mark all windows as not boring
+    , ((modm .|. controlMask, xK_v        ), spawn "/home/lisael/bin/borewin.sh") -- %! Iteractive boring
+    , ((modm .|. shiftMask,   xK_BackSpace), removeWorkspace) -- %! Delete current workspace
+    , ((modm .|. shiftMask,   xK_r        ), renameWorkspace def) -- %! Rename current workspace
 
     -- projects
-    , ((modm, xK_semicolon), switchProjectPrompt defaultXPConfig )
+    , ((modm, xK_semicolon), switchProjectPrompt defaultXPConfig ) -- %! Toggle Projects prompt
 
     -- layout
-    , ((modm,                 xK_space ), sendMessage NextLayout)
-    , ((modm .|. shiftMask,   xK_space ), setLayout $ XMonad.layoutHook conf)
-    , ((modm .|. shiftMask,   xK_l     ), windowGo R False)
-    , ((modm .|. shiftMask,   xK_h     ), windowGo L False)
-    , ((modm .|. shiftMask,   xK_k     ), windowGo U False)
-    , ((modm .|. shiftMask,   xK_j     ), windowGo D False)
-    , ((modm,                 xK_Tab   ), focusDown)
-    , ((modm,                 xK_grave ), dwmpromote)
-
-    , ((modm,                 xK_j     ), windows W.focusDown)
-    , ((modm,                 xK_k     ), windows W.focusUp  )
-    , ((modm,                 xK_m     ), windows W.focusMaster  )
-    , ((modm,                 xK_h     ), sendMessage Shrink)
-    , ((modm,                 xK_l     ), sendMessage Expand)
-    , ((modm,                 xK_t     ), withFocused $ windows . W.sink)
-    , ((modm,                 xK_comma ), sendMessage (IncMasterN 1))
-    , ((modm,                 xK_period), sendMessage (IncMasterN (-1)))
+    , ((modm,                 xK_space ), sendMessage NextLayout) -- %! Cycle layouts
+    , ((modm .|. shiftMask,   xK_space ), setLayout $ XMonad.layoutHook conf) -- %! Default layout
+    , ((modm .|. shiftMask,   xK_l     ), windowGo R False) -- %! Move to the window on the right
+    , ((modm .|. shiftMask,   xK_h     ), windowGo L False) -- %! Move to the window on the right
+    , ((modm .|. shiftMask,   xK_k     ), windowGo U False) -- %! Move to the window on the right
+    , ((modm .|. shiftMask,   xK_j     ), windowGo D False) -- %! Move to the window on the right
+    , ((modm,                 xK_Tab   ), focusDown) -- %! Next not boring Window
+    , ((modm,                 xK_grave ), dwmpromote) -- %! Promote Window as master or switch master
+    , ((modm,                 xK_j     ), windows W.focusDown) -- %! Next window (incl. boring)
+    , ((modm,                 xK_k     ), windows W.focusUp  ) -- %! Prev window (incl. boring)
+    , ((modm,                 xK_m     ), windows W.focusMaster  ) -- %! Move focus to master
+    , ((modm,                 xK_h     ), sendMessage Shrink) -- %! Shrink master area
+    , ((modm,                 xK_l     ), sendMessage Expand) -- %! Expand master area
+    , ((modm,                 xK_t     ), withFocused $ windows . W.sink) -- %! Push floating window to tiling
+    , ((modm,                 xK_comma ), sendMessage (IncMasterN 1)) -- %! Increment number of master windows
+    , ((modm,                 xK_period), sendMessage (IncMasterN (-1))) -- %! Decrement the number of Master windows
 
     -- media control
     , ((0, xF86XK_AudioMute           ), spawn "amixer -q set Master toggle")
@@ -411,6 +422,6 @@ myConfig xmproc = desktopConfig {
     manageHook         = manageDocks <+> myManageHook <+> manageHook desktopConfig,
     -- startupHook        = myStartupHook,
     logHook            = myLogHook xmproc,
-    handleEventHook  = myHandleEventHook <+> handleEventHook desktopConfig
+    handleEventHook    = myHandleEventHook <+> handleEventHook desktopConfig
 }
 
