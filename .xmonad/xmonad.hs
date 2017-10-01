@@ -129,6 +129,7 @@ myManageHook = composeAll
     , className =? "MPlayer"        --> doFloat
     , className =? "Pinentry-gtk-2" --> doFloat
     , className =? "VirtualBox"     --> doShift "4:vm"
+    , className =? "Xmessage"       --> doFloat
     , className =? "Xchat"          --> doShift "5:media"
     , className =? "stalonetray"    --> doIgnore
     , isFullscreen --> (doF W.focusDown <+> doFullFloat)]
@@ -152,12 +153,12 @@ minMaxNamed :: ( LayoutClass l Window ) => String -> l Window -> ModifiedLayout 
 minMaxNamed name layout =
     named name $ minimize (maximizeWithPadding 0 layout)
 
-threeCol = minMaxNamed "3Col2" ( ThreeColMid 1 (3/100) (1/2) )
-tall = minMaxNamed "Tall" ( Tall 1 (3/100) (1/2) )
-full = minMaxNamed "Full" Full 
-ide = minMaxNamed "IDE" ( IDE 1 (3/100) (2/3) )
+threeCol = minMaxNamed "=| |=" ( ThreeColMid 1 (3/100) (1/2) )
+tall = minMaxNamed "[ ]=" ( Tall 1 (3/100) (1/2) )
+full = minMaxNamed "[  ]" Full
+ide = minMaxNamed "[|]=" ( IDE 1 (3/100) (2/3) )
 grid = minMaxNamed "#" Grid 
-large= minMaxNamed "LIDE" ( Mirror ( Tall 3 (3/100) (4/5) ) )
+large= minMaxNamed "ITTI" ( Mirror ( Tall 3 (3/100) (4/5) ) )
 
 realFull = noBorders (fullscreenFull Full)
 
@@ -382,25 +383,19 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
   ]
 
 
+statusShowWSIndex :: WorkspaceId -> String
+statusShowWSIndex wsId =
+    wsId
+
 ------------------------------------------------------------------------
--- Status bars and logging
--- Perform an arbitrary action on each internal state change or X event.
--- See the 'DynamicLog' extension for examples.
---
--- To emulate dwm's status bar
---
--- > logHook = dynamicLogDzen
---
-
-
 -- myStartupHook = return ()
-
 myLogHook xmproc = do
     dynamicLogWithPP $ xmobarPP {
             ppOutput = hPutStrLn xmproc
+          , ppHidden = statusShowWSIndex
           , ppTitle = xmobarColor xmobarTitleColor "" . shorten 100
-          , ppCurrent = xmobarColor xmobarCurrentWorkspaceColor ""
-          , ppSep = "   "
+          , ppCurrent = xmobarColor xmobarCurrentWorkspaceColor "" . wrap "[" "]"
+          , ppSep = " | "
     }
     updatePointer (0.5, 0.5) (0, 0)
     workspaceHistoryHook
