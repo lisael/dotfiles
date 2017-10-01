@@ -4,8 +4,11 @@
 -- based on https://github.com/bitterjug/dotfiles/blob/master/xmonad/xmonad.hs
 -- lots of good ideas from 
 
+import Control.Monad  -- IDE
 import System.IO
 import System.Exit
+
+
 import XMonad
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS
@@ -118,6 +121,7 @@ myManageHook = composeAll
     , className =? "Firefox"        --> doShift "1:www"
     , resource  =? "desktop_window" --> doIgnore
     , className =? "Galculator"     --> doFloat
+    , className =? "Arandr"         --> doFloat
     , className =? "Steam"          --> doFloat
     , className =? "Gimp"           --> doFloat
     , className =? "Dialog"         --> doFloat
@@ -233,6 +237,18 @@ taggingMode =
     , ((0,           xK_Tab), focusDown )
     ]
 
+-- ide_tile :: X()
+-- ide_tile= do
+--     let wins=W.index (windows (\x -> x))
+--     spawn "zenity --info --text='coucou'"
+--
+ide_tile' :: W.StackSet i l Window s sd -> W.StackSet i l Window s sd
+ide_tile' = W.modify' $ \c -> c
+
+ide_tile :: X()
+ide_tile = do
+    windows ide_tile'
+
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
   ----------------------------------------------------------------------
   -- Custom key bindings
@@ -242,18 +258,20 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask,   xK_Return), windows W.swapMaster) -- %! Swap the focused window and the master window
     , ((modm,                 xK_x     ), spawn myLocker) -- %! Lock screen
     , ((modm,                 xK_p     ), spawn myLauncher) -- %! App launcher
-    , ((modm .|. shiftMask,   xK_p     ), spawn "/home/lisael/bin/pass_finder.sh") -- %! Password finder
+    , ((modm .|. shiftMask,   xK_p     ), spawn "pass_finder.sh") -- %! Password finder
     , ((modm .|. controlMask, xK_p     ), spawn myScreenshot) -- %! Screenshot
     , ((modm,                 xK_b     ), sendMessage ToggleStruts) -- %! Hide status bar
     , ((modm .|. shiftMask,   xK_q     ), io (exitWith ExitSuccess)) -- %! Quit XMonad
     , ((modm,                 xK_q     ), restart "xmonad" True) -- %! Recompile and restart XMonad
-    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi /home/lisael/bin/clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0") -- %! Open clipboard manager
+    , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0") -- %! Open clipboard manager
+    , ((0,               xF86XK_Display), spawn "arandr")
     -- , ((modm,                 xK_n), refresh)
+    , ((modm,                 xK_a     ), ide_tile)
 
     -- requires this in .xinitrc
     -- xmodmap -e "remove Lock = Caps_Lock"
     -- xmodmap -e "keycode  66 = XF86Mail NoSymbol XF86Mail"
-    , ((0,                 xF86XK_Mail), spawn "/home/lisael/bin/easymove.sh")
+    , ((0,                 xF86XK_Mail), spawn "easymove.sh")
 
 
     -- client control
@@ -284,7 +302,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,                 xK_v         ), do markBoring -- %! Mark window as boring
                                                  focusDown)
     , ((modm .|. shiftMask,   xK_v        ), clearBoring) -- %! Mark all windows as not boring
-    , ((modm .|. controlMask, xK_v        ), spawn "/home/lisael/bin/borewin.sh") -- %! Iteractive boring
+    , ((modm .|. controlMask, xK_v        ), spawn "/borewin.sh") -- %! Iteractive boring
     , ((modm .|. shiftMask,   xK_BackSpace), removeWorkspace) -- %! Delete current workspace
     , ((modm .|. shiftMask,   xK_r        ), renameWorkspace def) -- %! Rename current workspace
 
