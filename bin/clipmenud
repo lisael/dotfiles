@@ -1,7 +1,7 @@
 #!/bin/bash
 
-major_version=3
-cache_dir=/tmp/clipmenu.$major_version.$USER/
+major_version=4
+cache_dir=$HOME/.clipmenu.$major_version
 cache_file=$cache_dir/line_cache
 lock_file=$cache_dir/lock
 hash_file=$cache_dir/hash
@@ -55,6 +55,7 @@ debug() {
 # It's ok that this only applies to the final directory.
 # shellcheck disable=SC2174
 mkdir -p -m0700 "$cache_dir"
+touch $hash_file
 
 declare -A last_data
 declare -A last_filename
@@ -76,22 +77,22 @@ while sleep "${CM_SLEEP:-0.5}"; do
     for selection in primary; do
         data=$(_xsel -o --"$selection"; printf x)
 
-        debug "Data before stripping: $data"
+        # debug "Data before stripping: $data"
 
         # We add and remove the x so that trailing newlines are not stripped.
         # Otherwise, they would be stripped by the very nature of how POSIX
         # defines command substitution.
         data=${data%x}
 
-        debug "Data after stripping: $data"
+        # debug "Data after stripping: $data"
 
         if [[ $data != *[^[:space:]]* ]]; then
-            debug "Skipping as clipboard is only blank"
+            # debug "Skipping as clipboard is only blank"
             continue
         fi
 
         if [[ ${last_data[$selection]} == "$data" ]]; then
-            debug 'Skipping as last selection is the same as this one'
+            # debug 'Skipping as last selection is the same as this one'
             continue
         fi
 
@@ -111,7 +112,7 @@ while sleep "${CM_SLEEP:-0.5}"; do
         #### START lisael's additions!!
         found=false
         for line in $(cat ${hash_file}); do
-            if $( python -c "import crypt; print( crypt.crypt('''${data}''', '${line}') == '${line}' and 'true' or 'false')" ) ; then
+                if $( python -c "import sys; import crypt; data = sys.stdin.read(); print( crypt.crypt(data[:-1], '${line}') == '${line}' and 'true' or 'false')" <<< ${data}) ; then
                 found=true
                 break
             fi

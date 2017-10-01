@@ -1,7 +1,7 @@
 #! /bin/bash
 
 PASS_DIR=~/.password-store
-CLIPMENU_DIR=/tmp/clipmenu.3.${USER}
+CLIPMENU_DIR=$HOME/.clipmenu.4
 CM_LOCKFILE=${CLIPMENU_DIR}/lock
 lock_timeout=2
 PASS_HASH_FILE=${CLIPMENU_DIR}/hash
@@ -50,14 +50,14 @@ touch ${PASS_HASH_FILE}
 chmod 600 ${PASS_HASH_FILE}
 
 for line in $(cat ${PASS_HASH_FILE}); do
-    if $( python -c "import crypt; print( crypt.crypt('${PASSWORD}', '${line}') == '${line}' and 'true' or 'false')" ) ; then
+    if $( python -c "import sys, crypt; data = sys.stdin.read(); print( crypt.crypt(data[:-1], '${line}') == '${line}' and 'true' or 'false')" <<< ${PASSWORD}) ; then
         found=true
         break
     fi
 done
 
 if ! $found ; then
-    python -c "import crypt; print(crypt.crypt('${PASSWORD}', crypt.mksalt(crypt.METHOD_SHA512)))" >> ${PASS_HASH_FILE}
+    python -c "import crypt, sys; data = sys.stdin.read(); print(crypt.crypt(data[:-1], crypt.mksalt(crypt.METHOD_SHA512)))" <<< ${PASSWORD} >> ${PASS_HASH_FILE}
 fi
 
 
