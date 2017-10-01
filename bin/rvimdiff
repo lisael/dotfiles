@@ -1,0 +1,25 @@
+#! /bin/bash
+
+IFS=$'\n'
+
+for files in `diff -rq $@ | grep "^Files "  | awk '{printf "%s %s\n",$2,$4}'`
+do
+    read -p "Edit $files ?[Y/n/q] " choice
+    case $choice in
+        "" | "y" | "Y")
+            IFS=" "
+            vimdiff $files
+            IFS=$'\n'
+            ;;
+        "n")
+            continue
+            ;;
+        "q")
+            break
+            ;;
+    esac
+done
+
+IFS=" "
+
+# vim: set ft=sh:
