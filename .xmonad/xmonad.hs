@@ -49,6 +49,12 @@ import Graphics.X11.ExtraTypes.XF86
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
+-- testing
+import XMonad.Layout.SubLayouts
+import XMonad.Layout.WindowNavigation as Nav
+
+import XMonad.Layout.Combo
+import XMonad.Layout.TwoPane
 
 -- local stuff (~/.xmonad/lib/)
 import XMonad.Layout.IDE(IDE(..))
@@ -158,11 +164,16 @@ tall = minMaxNamed "[ ]=" ( Tall 1 (3/100) (1/2) )
 full = minMaxNamed "[  ]" Full
 ide = minMaxNamed "[|]=" ( IDE 1 (3/100) (2/3) )
 grid = minMaxNamed "#" Grid 
-large= minMaxNamed "ITTI" ( Mirror ( Tall 3 (3/100) (4/5) ) )
+large = minMaxNamed "ITTI" (Mirror $ Tall 3 (3/100) (4/5) )
+combo = minMaxNamed "Combo" ( combineTwo (TwoPane 0.03 0.5) (Mirror $ Tall 3 (3/100) (4/5) ) (tabbed shrinkText def) )
 
 realFull = noBorders (fullscreenFull Full)
 
-nostruts = avoidStruts ( ide ||| large  ||| tall ||| grid ||| threeCol ||| full )
+nostruts = avoidStruts $ ide ||| large  ||| tall ||| grid ||| combo ||| threeCol ||| full
+
+
+
+
 
 myLayout = boringWindows ( nostruts ||| realFull )
 
@@ -267,7 +278,15 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,                 xK_c     ), spawn "CM_LAUNCHER=rofi clipmenu -dmenu -i -font 'mono 6' -p 'copy:' -scrollmethod 1 -lines 50 -hide-scollbar -line-margin 0") -- %! Open clipboard manager
     , ((0,               xF86XK_Display), spawn "arandr")
     -- , ((modm,                 xK_n), refresh)
-    , ((modm,                 xK_a     ), ide_tile)
+
+    -- testing.
+    -- , ((modm, xK_a), submap $ defaultSublMap conf)
+    -- , ((modm .|. controlMask, xK_m), withFocused (sendMessage . MergeAll))
+    , ((modm, xK_a), sendMessage $ Nav.Move Nav.R)
+    , ((modm .|. controlMask .|. shiftMask, xK_Left ), sendMessage $ Nav.Move Nav.L)
+    , ((modm .|. controlMask .|. shiftMask, xK_Up   ), sendMessage $ Nav.Move Nav.U)
+    , ((modm .|. controlMask .|. shiftMask, xK_Down ), sendMessage $ Nav.Move Nav.D)
+    -- , ((modm,                 xK_a     ), ide_tile)
 
     -- requires this in .xinitrc
     -- xmodmap -e "remove Lock = Caps_Lock"
@@ -321,7 +340,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm,                 xK_grave ), dwmpromote) -- %! Promote Window as master or switch master
     , ((modm,                 xK_j     ), windows W.focusDown) -- %! Next window (incl. boring)
     , ((modm,                 xK_k     ), windows W.focusUp  ) -- %! Prev window (incl. boring)
-    , ((modm,                 xK_m     ), windows W.focusMaster  ) -- %! Move focus to master
+    -- , ((modm,                 xK_m     ), windows W.focusMaster  ) -- %! Move focus to master
     , ((modm,                 xK_h     ), sendMessage Shrink) -- %! Shrink master area
     , ((modm,                 xK_l     ), sendMessage Expand) -- %! Expand master area
     , ((modm,                 xK_t     ), withFocused $ windows . W.sink) -- %! Push floating window to tiling
