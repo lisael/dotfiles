@@ -307,6 +307,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask,   xK_s    ), killAllOtherCopies) -- %! Not sticky
     , ((modm,                 xF86XK_Mail), withFocused (sendMessage . maximizeRestore)) -- %! Toggle Fullscreen window
 
+    , ((0,                    xF86XK_MonBrightnessDown), spawn "osdbacklight -7")
+    , ((0,                    xF86XK_MonBrightnessUp), spawn "osdbacklight +7")
+
     , ((modm,                 xK_y    ), inputMode taggingMode) -- %! Toggle tagging mode
     -- , ((modm,                 xK_y  ), tagPrompt def (\s -> withFocused (addTag s)))
     -- , ((modm .|. controlMask, xK_y  ), tagDelPrompt def)

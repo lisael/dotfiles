@@ -15,6 +15,7 @@ setopt appendhistory autocd
 bindkey -v
 # End of lines configured by zsh-newuser-install
 #source /usr/lib/python2.7/site-packages/powerline/bindings/zsh/powerline.zsh
+source ~/.profile
 source /bin/liquidprompt
 
 export EDITOR=kak
@@ -44,11 +45,11 @@ export PAGER=vimpager
 # export MANPAGER=$XDG_CONFIG_HOME/kak/bin/man-pager
 export TERMINAL=xfce4-terminal
 
-PATH="/home/lisael/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/lisael/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/lisael/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/lisael/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/lisael/perl5"; export PERL_MM_OPT;
+#PATH="/home/lisael/perl5/bin${PATH:+:${PATH}}"; export PATH;
+#PERL5LIB="/home/lisael/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+#PERL_LOCAL_LIB_ROOT="/home/lisael/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+#PERL_MB_OPT="--install_base \"/home/lisael/perl5\""; export PERL_MB_OPT;
+#PERL_MM_OPT="INSTALL_BASE=/home/lisael/perl5"; export PERL_MM_OPT;
 
 eval "$(fasd --init auto)"
 alias k='f -e kak'
