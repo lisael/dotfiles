@@ -49,6 +49,8 @@ import Graphics.X11.ExtraTypes.XF86
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
+import KeyDown
+
 -- testing
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.WindowNavigation as Nav
@@ -280,9 +282,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- , ((modm,                 xK_n), refresh)
 
     -- testing.
+    , ((modm, xK_a), return ())
     -- , ((modm, xK_a), submap $ defaultSublMap conf)
     -- , ((modm .|. controlMask, xK_m), withFocused (sendMessage . MergeAll))
-    , ((modm, xK_a), sendMessage $ Nav.Move Nav.R)
+    -- , ((modm, xK_a), sendMessage $ Nav.Move Nav.R)
     , ((modm .|. controlMask .|. shiftMask, xK_Left ), sendMessage $ Nav.Move Nav.L)
     , ((modm .|. controlMask .|. shiftMask, xK_Up   ), sendMessage $ Nav.Move Nav.U)
     , ((modm .|. controlMask .|. shiftMask, xK_Down ), sendMessage $ Nav.Move Nav.D)
@@ -291,7 +294,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- requires this in .xinitrc
     -- xmodmap -e "remove Lock = Caps_Lock"
     -- xmodmap -e "keycode  66 = XF86Mail NoSymbol XF86Mail"
-    , ((0,                 xF86XK_Mail), spawn "easymove.sh")
+    , ((0,                 xF86XK_Mail), return ())
 
 
     -- client control
@@ -423,7 +426,7 @@ myLogHook xmproc = do
     workspaceHistoryHook
     logHook desktopConfig
 
-myHandleEventHook = minimizeEventHook
+myHandleEventHook = minimizeEventHook <+> keyDownEventHook
 
 ------------------------------------------------------------------------
 -- Run xmonad with all the defaults we set up.
